@@ -1,0 +1,33 @@
+# pa-spec example configuration.
+# Copy to ~/.assistant/config.toml and replace every placeholder.
+# Environment-specific values (endpoints, model IDs, CLI paths) belong
+# here, never in the spec repo.
+
+[gateway]
+# Any OpenAI-compatible endpoint.
+base_url = "https://model-gateway.example.com/v1"
+api_key_env = "PA_GATEWAY_API_KEY"
+
+[tiers]
+# Map tiers to whatever model IDs your gateway exposes.
+free_small = "free/example-small"
+free_large = "free/example-large"
+frontier_primary = "frontier/example-primary"
+frontier_secondary = "frontier/example-secondary"
+
+[agent_cli]
+# Your headless-capable agent CLI (Claude Code, pi, or similar).
+command = "your-agent-cli"
+headless_flags = ["--print", "--output-format", "json"]
+# Transcript locations are provider-specific; confirm them before
+# enabling a trace adapter (see spec/open-questions.md).
+
+[paths]
+global_dir = "~/.assistant"
+
+[schedules]
+daily_sweep = "06:30"
+weekly_consolidation = "sun 09:00"
+weekly_trace_analysis = "sun 10:00"
+# Run analysis only when enough new completed outcomes exist.
+min_completed_outcomes_for_analysis = 10

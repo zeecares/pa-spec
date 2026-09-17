@@ -1,0 +1,23 @@
+# pa-spec example routing table.
+# Copy to ~/.assistant/routing.toml and replace placeholder model IDs
+# with whatever your gateway exposes. Hand-editable; the trace-analysis
+# pass may suggest changes but never edits this file.
+
+[steps]
+filter = "free/example-small"
+extract = "free/example-small"
+summarize = "free/example-large"
+consolidate = "free/example-large"
+nonprod_execute = "free/example-large"
+
+# Escalation rules override the step table when their condition holds.
+# Conditions are evaluated from step metadata: stakes, production
+# exposure, classifier confidence, contradiction flags.
+
+[[escalate]]
+when = "high_stakes or prod_touching or ambiguity_high"
+model = "frontier/example-primary"
+
+[[escalate]]
+when = "contradiction or independent_review_needed"
+model = "frontier/example-secondary"
