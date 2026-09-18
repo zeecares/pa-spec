@@ -37,4 +37,5 @@ The hard part is not dispatch. It is the front-door agent's judgment: preserving
 
 ## Status
 
-Design reviewed against public systems (Letta/MemGPT, Zep/Graphiti, OpenClaw, Claude Code memory, mem0, Obelisk as a studied reference) and against lessons from a working personal assistant. Nothing here is implemented. Feedback and adoption welcome; no license is attached yet, so treat it as all-rights-reserved until one is added.
+Design reviewed against public systems (Letta/MemGPT, Zep/Graphiti, OpenClaw, Claude Code memory, mem0, Honcho, Obelisk as a studied reference) and against lessons from a working personal assistant. The 2026-09-18 mem0/Honcho evaluation earned the MemoryBackend interface, the candidate lifecycle, and the memory eval fixtures in [spec/memory.md](spec/memory.md). Nothing here is implemented. Feedback and adoption welcome; no license is attached yet, so treat it as all-rights-reserved until one is added.
+
