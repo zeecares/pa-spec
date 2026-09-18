@@ -12,9 +12,10 @@ One binary, one front door, two storage scopes, disposable sessions. The front d
       +------------+-------------+
       |                          |
   control plane             knowledge plane
-  (SQLite: outcomes,        (Markdown notes + FTS5,
-   sessions, decisions,      gated writes, read-time
-   events, watches)          staleness filtering)
+  (SQLite: outcomes,        MemoryBackend interface:
+   sessions, decisions,      Markdown notes + FTS5,
+   events, watches)          gated writes, read-time
+                             staleness filtering)
       |                          |
       +------------+-------------+
                    |
@@ -50,7 +51,9 @@ These come from watching a working above-all personal assistant operate, and eve
 
 **Proactivity is triggers plus restraint.** Schedules and event triggers are the easy half. The hard half is interruption policy: a proactive message must name a concrete decision, risk, or saved step, or it stays in the internal queue until the next natural interaction.
 
-**Memory writes happen off the critical path.** The session that does the work does not also decide what becomes permanent truth. Background passes propose memory after the outcome is known. Machine-written notes start as drafts, replace rather than append, keep their sources, and are filtered for staleness at read time. Uncontrolled retention is the documented killer of agent memory - not bad retrieval - so admission control outranks embeddings, graphs, and every other retrieval upgrade.
+**The knowledge plane hides behind a MemoryBackend interface.** SQLite plus FTS5 is the reference backend; a pluggable candidate (mem0_oss is the only one currently considered) must win replay evals on harvested traces before adoption, and Honcho's AGPL license keeps it a study source. Backends are swappable; the write gate is not.
+
+**Memory writes happen off the critical path.** The session that does the work does not also decide what becomes permanent truth. Background passes propose memory after the outcome is known. Machine-written notes start as candidates, replace rather than append, keep their sources, and are filtered for staleness at read time. Uncontrolled retention is the documented killer of agent memory - not bad retrieval - so admission control outranks embeddings, graphs, and every other retrieval upgrade.
 
 **Route by judgment level, not task label.** A summary can contain a hard judgment; a coding task can contain mechanical steps. The cheapest capable model handles each step, with escalation on confidence, stakes, and verification needs.
 
@@ -87,3 +90,4 @@ The spec names no vendor. Wherever a concrete choice is needed:
 - **model tiers**: "free tier" for bulk/filter/summarize work, "frontier tier" for ambiguity, difficult synthesis, and production-touching judgment
 
 `config.example.toml` and `routing.example.toml` carry placeholder values; map them to whatever your gateway exposes.
+
