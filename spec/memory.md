@@ -34,12 +34,16 @@ evidence: [trace:<id>, outcome:<id>]    # backing records beyond the source anch
 A note about one observer's view is never presented as another's knowledge;
 perspective leakage is an eval fixture, not a hope.
 
+Machine-written notes distinguish explicit observations from inferred conclusions, naming the inference kind, so a derived claim is never reviewed or served with the same weight as a witnessed fact. Retrieval can answer "why do you think this?" from the attribution fields alone: the note's sources, evidence, observer, and vantage point.
+
 - `sources` is mandatory. A note that cannot say why it exists does not get admitted.
 - `status` and `stale_after` are checked at read time. Retrieval filters out drafts, candidates, rejected, superseded, needs-review, and expired notes, and may abstain entirely when nothing active matches.
 - `draft` is a human work-in-progress; `candidate` is a machine proposal awaiting review. The machine lifecycle is `candidate -> reviewed -> active -> superseded|rejected`. Sessions and background passes create candidates only; review (manual at first) promotes to active; replacement moves the prior note to superseded with its source chain intact; discarded candidates stay on disk as rejected for audit.
 - `replaces` keeps the prior note and its source chain as `superseded` - replacement, never silent append-and-contradict.
 
 FTS5 (SQLite full-text search) indexes only active, non-stale notes. At single-user scale, ranked FTS over a clean corpus beats embeddings over a dirty one.
+
+Retrieval is two-stage. A cheap first stage over active notes narrows to a small candidate set, and any paid rerank (a cross-encoder or a model call) runs only on those 10-20 survivors - the model-routing rule applied to search. First-stage ranking mixes note metadata (verified status, staleness horizon, recency) with text relevance instead of treating all active notes as equal; the rank-by-attribute pattern from search-database design, translated down to a single-user store.
 
 ## The write gate
 
@@ -79,7 +83,10 @@ The knowledge plane sits behind a small interface so backends can be benchmarked
 - **review**: approve, replace (supersede), discard
 - **context**: the bounded approved set behind generated `AGENT_CONTEXT.md`
 
-`sqlite_fts` - Markdown files plus an FTS5 index - is the reference backend. `mem0_oss` (Apache-2.0, self-hostable, configurable internal model/embedding/store endpoints) is the only pluggable candidate currently considered, and it is adopted only if replay evals on harvested traces show a clear retrieval win without worse pollution, provenance, latency, or operations. Its current OSS pipeline is single-pass ADD-only extraction with temporal preservation of changed facts; the older ADD/UPDATE/DELETE merge-loop descriptions are stale. Honcho is a study source, not a candidate: AGPL-3.0 is a hard stop, and its continuous latent inference is further from this gate than the current design. Its useful ideas - explicit observations vs inferred conclusions, observer-scoped representations, evidence-backed compact profiles, and a "why do you think this?" evidence query - are reflected in the attribution fields and eval fixtures, not in a dependency.
+`sqlite_fts` - Markdown files plus an FTS5 index - is the reference backend. Two pluggable candidates are currently considered, and either is adopted only if replay evals on harvested traces show a clear retrieval win without worse pollution, provenance, latency, or operations:
+
+- `sqlite_hybrid`: the reference backend plus local embeddings. FTS5's BM25 ranking and an embedding scan run as parallel first stages and merge with reciprocal-rank fusion. It is the cheapest possible experiment - no new dependency beyond an embedding model - and if it matches `mem0_oss` on the replay evals, the mem0 experiment is skipped entirely. (The hybrid-retrieval and staged-ranking patterns are borrowed from turbopuffer's published design; their object-storage machinery answers scale problems a single-user local tool does not have, so only the retrieval discipline carries over.)
+- `mem0_oss` (Apache-2.0, self-hostable, configurable internal model/embedding/store endpoints). Its current OSS pipeline is single-pass ADD-only extraction with temporal preservation of changed facts; the older ADD/UPDATE/DELETE merge-loop descriptions are stale. Honcho is a study source, not a candidate: AGPL-3.0 is a hard stop, and its continuous latent inference is further from this gate than the current design. Its useful ideas - explicit observations vs inferred conclusions, observer-scoped representations, evidence-backed compact profiles, and a "why do you think this?" evidence query - are reflected in the attribution fields and eval fixtures, not in a dependency.
 
 ## Memory evals
 
@@ -91,6 +98,7 @@ Extraction and retrieval are evaluated separately, replaying an approved trace s
 - **cross-project leakage**: project notes must not surface in another project's retrieval or generated context
 - **staleness**: expired notes must leave the index, and retrieval must abstain when nothing active matches
 - **perspective leakage**: a note recorded from one observer's vantage must not be served as another's knowledge
+- **golden queries**: a fixed set of real retrieval queries with hand-labeled ideal notes, scored with NDCG or recall@k, run per backend. The fixtures above measure pollution behavior; this one is the pure retrieval-quality score, and it is how `sqlite_hybrid` and `mem0_oss` earn or lose their place against the reference backend.
 
 A backend change ships only if it wins on these fixtures without worse pollution, provenance, latency, or operations.
 
@@ -100,10 +108,11 @@ Track, and act on:
 
 - candidates created vs approved vs later retrieved
 - notes replaced or contradicted within 30 days
-- retrieved notes that were ignored or corrected
+- retrieval recall: retrieved notes that were ignored or corrected. This is the live-traffic quality signal, reviewed weekly as a first-class metric, not a side note
 - generated `AGENT_CONTEXT.md` size
 - prompt tokens spent on memory per completed outcome
 - extraction failures and empty batches, which must always be visible (a silent zero is treated as a failure, not as "nothing to learn")
 
 If write volume rises while approved-note use falls, stop auto-admission and tighten candidate generation. Consolidation never solves pollution by merging more aggressively.
+
 

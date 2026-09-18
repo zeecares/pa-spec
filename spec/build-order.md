@@ -28,6 +28,7 @@ Each weekend ends with something that works and an acceptance criterion that pro
 - Normalize messages, tool calls, failures, and token usage only
 - Idempotency and compaction/branch fixtures
 - First SQL-driven pattern report tied to outcomes
+- Minimal skill loader from [skills.md](skills.md): SKILL.md discovery across both scopes, explicit `--skill` selection only
 
 **Acceptance:** one provider's adapter fully works and is tested. Two providers is a stretch goal; a second adapter is conditional on format stability, not promised.
 
@@ -36,7 +37,7 @@ Each weekend ends with something that works and an acceptance criterion that pro
 - Daily expiry sweep and bounded weekly consolidation
 - Watches and events with the interruption value gate
 - `routing.toml` live, with trace-informed (human-applied) suggestions
-- Pollution, prompt-size, and free/frontier cost report
+- Pollution, retrieval-recall, prompt-size, and free/frontier cost report
 - Recovery tests: killed session, failed import, stale note, contradictory note
 
 **Acceptance:** the assistant holds work across sessions, learns only through review, and stays quiet when no action is useful.
@@ -44,3 +45,4 @@ Each weekend ends with something that works and an acceptance criterion that pro
 ## Sizing note
 
 Four weekends holds only because trace capture is deliberately narrow. Universal history import, desktop browsing, full subagent trees, or additional providers would move trace work into a separate project. Guard that boundary; it is the difference between a spec that gets built and one that gets admired.
+

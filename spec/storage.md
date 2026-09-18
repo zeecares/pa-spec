@@ -5,7 +5,7 @@ State lives in two scopes that the CLI merges at runtime:
 - **Global** (`~/.assistant/`): cross-project outcomes, preferences, people, global watches, the trace index. Never committed anywhere.
 - **Project** (`<project>/.assistant/`): project outcomes, decisions, approved project notes, the generated agent-context file. May travel with the repo.
 
-Inside a project directory the CLI resolves the repo root, opens the global database, then overlays the project database. Outside a project it works from global scope alone. Queries that need both scopes join explicitly; nothing silently bleeds across.
+Inside a project directory the CLI resolves the repo root, opens the global database, then overlays the project database. Outside a project it works from global scope alone. Queries that need both scopes join explicitly; nothing silently bleeds across. The split is structural rather than a filter over one store: separate query sets get separate stores (the namespace-per-query-set lesson from search-database design), so cross-project leakage is structurally impossible instead of filtered out.
 
 ## Commit-safe vs private
 
@@ -85,3 +85,4 @@ Notes:
 - IDs are stable, human-inspectable strings. Imports and replays are idempotent on them.
 
 The knowledge plane (notes, FTS5, the candidates queue) is specified in [memory.md](memory.md).
+

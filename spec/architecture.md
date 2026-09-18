@@ -68,12 +68,14 @@ These come from watching a working above-all personal assistant operate, and eve
   config.toml               # gateway, tiers, CLI paths, schedules
   adapters/
     <provider>_trace.py     # one per verified transcript format
+  skills/                   # global instruction packs (see skills.md)
   logs/
 
 <project>/.assistant/
   assistant.db              # project outcomes, decisions, note index
   notes/                    # approved project knowledge
   candidates/               # draft project notes
+  skills/                   # project instruction packs; shadow global ones by name
   AGENT_CONTEXT.md          # generated native context surface for the agent CLI
 ```
 
@@ -90,4 +92,5 @@ The spec names no vendor. Wherever a concrete choice is needed:
 - **model tiers**: "free tier" for bulk/filter/summarize work, "frontier tier" for ambiguity, difficult synthesis, and production-touching judgment
 
 `config.example.toml` and `routing.example.toml` carry placeholder values; map them to whatever your gateway exposes.
+
 
