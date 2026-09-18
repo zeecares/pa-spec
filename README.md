@@ -28,14 +28,16 @@ The hard part is not dispatch. It is the front-door agent's judgment: preserving
 3. [spec/session-wrapper.md](spec/session-wrapper.md) - headless dispatch, interactive wrap, exit harvest
 4. [spec/trace-plane.md](spec/trace-plane.md) - trace schema, adapters, weekly pattern analysis
 5. [spec/memory.md](spec/memory.md) - the write gate, note format, consolidation cadence
-6. [spec/routing.md](spec/routing.md) - routing.toml and judgment-level routing
-7. [spec/proactivity.md](spec/proactivity.md) - watches, triggers, and the restraint rule
-8. [spec/build-order.md](spec/build-order.md) - four weekends, each with acceptance criteria
-9. [spec/open-questions.md](spec/open-questions.md) - environment facts to confirm before building
+6. [spec/skills.md](spec/skills.md) - explicit, session-scoped instruction packs
+7. [spec/routing.md](spec/routing.md) - routing.toml and judgment-level routing
+8. [spec/proactivity.md](spec/proactivity.md) - watches, triggers, and the restraint rule
+9. [spec/build-order.md](spec/build-order.md) - four weekends, each with acceptance criteria
+10. [spec/open-questions.md](spec/open-questions.md) - environment facts to confirm before building
 
 `config.example.toml` and `routing.example.toml` show the two configuration files with placeholder values. Your own gateway endpoints, model IDs, and CLI paths are environment-specific and do not belong in this repo.
 
 ## Status
 
-Design reviewed against public systems (Letta/MemGPT, Zep/Graphiti, OpenClaw, Claude Code memory, mem0, Honcho, Obelisk as a studied reference) and against lessons from a working personal assistant. The 2026-09-18 mem0/Honcho evaluation earned the MemoryBackend interface, the candidate lifecycle, and the memory eval fixtures in [spec/memory.md](spec/memory.md). Nothing here is implemented. Feedback and adoption welcome; no license is attached yet, so treat it as all-rights-reserved until one is added.
+Design reviewed against public systems (Letta/MemGPT, Zep/Graphiti, OpenClaw, Claude Code memory, mem0, Honcho, Obelisk as a studied reference) and against lessons from a working personal assistant. The 2026-09-18 mem0/Honcho evaluation earned the MemoryBackend interface, the candidate lifecycle, and the memory eval fixtures in [spec/memory.md](spec/memory.md). The 2026-09-18 turbopuffer evaluation added the `sqlite_hybrid` backend candidate, two-stage retrieval ranking, and the golden-query eval fixture to the same file. Project skills (the SKILL.md convention with explicit, session-scoped selection) are specified in [spec/skills.md](spec/skills.md), written back from the weekend-3 build. A reference implementation is in progress against this spec. Feedback and adoption welcome; no license is attached yet, so treat it as all-rights-reserved until one is added.
+
 
