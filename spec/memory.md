@@ -14,7 +14,7 @@ type: decision|fact|preference|procedure|summary
 sources: [session:<id>, outcome:<id>, file:<path>]
 generated: 2026-09-17T08:00:00+01:00
 verified: human|source|none
-status: candidate|active|superseded|rejected|needs-review
+status: draft|candidate|active|superseded|rejected|needs-review
 stale_after: 2026-12-17
 replaces: note:<id>|null
 ---
@@ -35,8 +35,8 @@ A note about one observer's view is never presented as another's knowledge;
 perspective leakage is an eval fixture, not a hope.
 
 - `sources` is mandatory. A note that cannot say why it exists does not get admitted.
-- `status` and `stale_after` are checked at read time. Retrieval filters out candidates, rejected, superseded, needs-review, and expired notes, and may abstain entirely when nothing active matches.
-- The lifecycle is `candidate -> reviewed -> active -> superseded|rejected`. Sessions and background passes create candidates only; review (manual at first) promotes to active; replacement moves the prior note to superseded with its source chain intact; discarded candidates stay on disk as rejected for audit.
+- `status` and `stale_after` are checked at read time. Retrieval filters out drafts, candidates, rejected, superseded, needs-review, and expired notes, and may abstain entirely when nothing active matches.
+- `draft` is a human work-in-progress; `candidate` is a machine proposal awaiting review. The machine lifecycle is `candidate -> reviewed -> active -> superseded|rejected`. Sessions and background passes create candidates only; review (manual at first) promotes to active; replacement moves the prior note to superseded with its source chain intact; discarded candidates stay on disk as rejected for audit.
 - `replaces` keeps the prior note and its source chain as `superseded` - replacement, never silent append-and-contradict.
 
 FTS5 (SQLite full-text search) indexes only active, non-stale notes. At single-user scale, ranked FTS over a clean corpus beats embeddings over a dirty one.
