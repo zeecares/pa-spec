@@ -83,10 +83,15 @@ The knowledge plane sits behind a small interface so backends can be benchmarked
 - **review**: approve, replace (supersede), discard
 - **context**: the bounded approved set behind generated `AGENT_CONTEXT.md`
 
-`sqlite_fts` - Markdown files plus an FTS5 index - is the reference backend. Two pluggable candidates are currently considered, and either is adopted only if replay evals on harvested traces show a clear retrieval win without worse pollution, provenance, latency, or operations:
+`sqlite_fts` - Markdown files plus an FTS5 index - is the reference backend. Three pluggable candidates are currently considered, and any one is adopted only if replay evals on harvested traces show a clear retrieval win without worse pollution, provenance, latency, or operations:
 
 - `sqlite_hybrid`: the reference backend plus local embeddings. FTS5's BM25 ranking and an embedding scan run as parallel first stages and merge with reciprocal-rank fusion. It is the cheapest possible experiment - no new dependency beyond an embedding model - and if it matches `mem0_oss` on the replay evals, the mem0 experiment is skipped entirely. (The hybrid-retrieval and staged-ranking patterns are borrowed from turbopuffer's published design; their object-storage machinery answers scale problems a single-user local tool does not have, so only the retrieval discipline carries over.)
-- `mem0_oss` (Apache-2.0, self-hostable, configurable internal model/embedding/store endpoints). Its current OSS pipeline is single-pass ADD-only extraction with temporal preservation of changed facts; the older ADD/UPDATE/DELETE merge-loop descriptions are stale. Honcho is a study source, not a candidate: AGPL-3.0 is a hard stop, and its continuous latent inference is further from this gate than the current design. Its useful ideas - explicit observations vs inferred conclusions, observer-scoped representations, evidence-backed compact profiles, and a "why do you think this?" evidence query - are reflected in the attribution fields and eval fixtures, not in a dependency.
+- `mem0_oss` (Apache-2.0, self-hostable, configurable internal model/embedding/store endpoints). Its current OSS pipeline is single-pass ADD-only extraction with temporal preservation of changed facts; the older ADD/UPDATE/DELETE merge-loop descriptions are stale.
+- `supermemory_local` (MIT, self-hosted, OpenAI-compatible model endpoint, local embeddings). It is an evaluation candidate, not an adopted dependency. Hosted Supermemory is out of scope for work data unless organizational policy explicitly permits it. The adapter must preserve the write gate: Supermemory-extracted `updates`, `extends`, `derives`, expiry and profile changes enter as source-backed candidates and cannot directly create or delete active notes. If the local API cannot expose enough source lineage, scope isolation and deterministic export/delete behavior to enforce that contract, the candidate fails before retrieval scoring.
+
+Run `sqlite_hybrid` first. Compare `mem0_oss` and `supermemory_local` only when replayed real traces show a gap that the local hybrid backend does not close. A second server, graph store or model runtime counts against the operations score.
+
+Honcho is a study source, not a candidate: AGPL-3.0 is a hard stop, and its continuous latent inference is further from this gate than the current design. Its useful ideas - explicit observations vs inferred conclusions, observer-scoped representations, evidence-backed compact profiles, and a "why do you think this?" evidence query - are reflected in the attribution fields and eval fixtures, not in a dependency.
 
 ## Memory evals
 
@@ -98,7 +103,14 @@ Extraction and retrieval are evaluated separately, replaying an approved trace s
 - **cross-project leakage**: project notes must not surface in another project's retrieval or generated context
 - **staleness**: expired notes must leave the index, and retrieval must abstain when nothing active matches
 - **perspective leakage**: a note recorded from one observer's vantage must not be served as another's knowledge
+- **derived-claim quarantine**: inferred graph facts never bypass candidate/review status
+- **source fidelity**: every returned or proposed fact points back to the ingested trace/document anchor
+- **profile freshness and boundedness**: stable approved facts remain query-independent; recent context expires or updates without stale leakage; token budget stays bounded
+- **scope isolation**: global and project containers cannot cross-surface
+- **export/delete/rebuild**: the backend can be rebuilt from approved sources, forgetting is observable, and a delete is verifiable
 - **golden queries**: a fixed set of real retrieval queries with hand-labeled ideal notes, scored with NDCG or recall@k, run per backend. The fixtures above measure pollution behavior; this one is the pure retrieval-quality score, and it is how `sqlite_hybrid` and `mem0_oss` earn or lose their place against the reference backend.
+
+Replay runs are checkpointed by phase - ingest -> index -> retrieve -> answer -> evaluate - so failed runs resume and stage costs stay inspectable. Report answer/retrieval quality, latency and context tokens separately (the useful part of Supermemory MemoryBench's `MemScore`), alongside the existing cost, abstention, provenance, pollution and operations metrics. Public LoCoMo/LongMemEval/ConvoMem runs are smoke tests; held-out harvested traces remain the adoption gate.
 
 A backend change ships only if it wins on these fixtures without worse pollution, provenance, latency, or operations.
 
@@ -114,5 +126,4 @@ Track, and act on:
 - extraction failures and empty batches, which must always be visible (a silent zero is treated as a failure, not as "nothing to learn")
 
 If write volume rises while approved-note use falls, stop auto-admission and tighten candidate generation. Consolidation never solves pollution by merging more aggressively.
-
 
